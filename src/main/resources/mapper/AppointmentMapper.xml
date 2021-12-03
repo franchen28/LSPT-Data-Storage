@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.acertainscientific.meetup.mapper.AppointmentMapper">
+
+    <select id="appointmentsGivenTime" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM appointment WHERE
+        is_deleted = 0 and room_id = #{roomId} and
+        date = #{dateTime}
+        and
+        month = #{month}
+        and
+        year = #{year}
+        and
+        (start_time BETWEEN #{startTime} AND #{endTime} or
+        end_time BETWEEN #{startTime} AND #{endTime} or
+        #{startTime} BETWEEN start_time AND  end_time or
+        #{endTime} BETWEEN start_time AND end_time)
+    </select>
+
+    <select id="isValidUser" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM user WHERE
+        is_delete = 0 and id = #{id}
+    </select>
+
+    <select id="appointmentsWithoutSelfTime" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM appointment WHERE
+        is_deleted = 0 and room_id = #{roomId} and
+        date = #{dateTime}
+        and
+        month = #{month}
+        and
+        year = #{year}
+        and
+        id != #{id}
+        and
+        (start_time BETWEEN #{startTime} AND #{endTime} or
+        end_time BETWEEN #{startTime} AND #{endTime} or
+        #{startTime} BETWEEN start_time AND  end_time or
+        #{endTime} BETWEEN start_time AND end_time)
+    </select>
+
+    <select id="listAppointment" resultType = "com.acertainscientific.meetup.model.AppointmentModel">
+        SELECT * FROM appointment WHERE
+        is_deleted = 0 AND
+        room_id = #{roomId} AND
+        <if test="startTime!= null and startTime != ''">
+            start_time <![CDATA[ >=  ]]> #{startTime} AND
+        </if>
+        <if test="endTime != null and endTime != ''">
+            end_time <![CDATA[ <=  ]]> #{endTime} AND
+        </if>
+        <if test="userId != null and userId != ''">
+            user_id = #{userId} AND
+        </if>
+       ((year * 400) + (month * 30) + (date))
+       BETWEEN ( (#{fromYear} * 400) + (#{fromMonth} * 30) + #{fromDate}) AND
+       ((#{toYear} * 400) + (#{toMonth} * 30) + #{toDate})
+
+    </select>
+</mapper>
